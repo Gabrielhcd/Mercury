@@ -1,8 +1,6 @@
 package org.ghcd;
 
-import org.ghcd.Server.Server;
-
-import java.io.IOException;
+import org.ghcd.server.Server;
 
 public class Main {
 
@@ -10,8 +8,8 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            server.startServer();
-        } catch (IOException e) {
+            server.openServer();
+        } catch (Exception e) {
             e.getStackTrace();
         }
 
