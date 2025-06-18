@@ -3,17 +3,22 @@ package org.ghcd.client;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.DataInputStream;
-import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+
+import org.ghcd.model.FileModel;
 
 public class Client {
     private String[] enableProtocols = {"TLSv1.2", "TLSv1.3", "TLSv1.1", "TLSv1", "SLSv3"};
     private DataOutputStream dataOutputStream = null;
     private DataInputStream dataInputStream = null;
-
     private ClientConfiguration clientConfiguration = new ClientConfiguration();
-
+    private FileSender fileSender = new FileSender();
+    private String[] listOfFilesToSend = {"/home/vanhoemhein/Documents/txts/testFile.txt",
+                                    "/home/vanhoemhein/Documents/txts/secondFile.txt"};
+    private ArrayList<FileModel> files = new ArrayList<>();
     public void createClientConnection() {
 
         try {
@@ -22,10 +27,12 @@ public class Client {
             dataOutputStream = new DataOutputStream(socket.getOutputStream());
             System.out.println("Sending the File to the Server");
             // Call SendFile Method
-            sendFile("/home/vanhoemhein/Documents/txts/testFile.txt");
+            //sendFile("/home/vanhoemhein/Documents/txts/testFile.txt");
+            files = fileSender.addFilesToList(listOfFilesToSend);
+            sendMultipleFiles();
   
               dataInputStream.close();
-              dataInputStream.close();
+              dataOutputStream.close();
           }
           catch (Exception e) {
             System.out.println("No server found!");
@@ -55,6 +62,29 @@ public class Client {
         }
         // close the file here
         fileInputStream.close();
+    }
+
+    private void sendMultipleFiles() throws IOException {
+        int bytes = 0;
+        byte[] buffer = new byte[4 * 1024];
+        try {
+            dataOutputStream.writeInt(files.size());
+            for (FileModel file: files) {
+                dataOutputStream.writeInt(file.getFileName().length());
+                dataOutputStream.write(file.getFileName().getBytes());
+                FileInputStream fileInputStream = new FileInputStream(file.getFile());
+                dataOutputStream.writeLong(file.getFile().length());
+
+                while ((bytes = fileInputStream.read(buffer))!= -1) {
+                    dataOutputStream.write(buffer, 0, bytes);
+                    dataOutputStream.flush();
+                }
+                fileInputStream.close();
+            }
+        } catch (IOException e) {
+            System.out.println("Error sending multiple files!");
+            e.printStackTrace();
+        }
     }
     
 }

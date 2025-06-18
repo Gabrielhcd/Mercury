@@ -1,25 +1,33 @@
 package org.ghcd.model;
+import java.io.File;
+import java.util.UUID;
 
 public class FileModel {
 
-    private int Id;
+    private UUID Id;
+    private File file;
     private String fileName;
     private byte[] fileData;
     private Long fileSize;
     private String fileExtension;
 
     public FileModel(int id, String fileName, byte[] fileData, String fileExtension) {
-        Id = id;
+        Id = UUID.randomUUID();
         this.fileName = fileName;
         this.fileData = fileData;
         this.fileExtension = fileExtension;
     }
 
-    public FileModel() {}
+    public FileModel() {
+        this.Id = UUID.randomUUID();
+    }
 
-
-    public int getId() {
+    public UUID getId() {
         return Id;
+    }
+
+    public File getFile() {
+        return file;
     }
 
     public String getFileName() {
@@ -34,8 +42,8 @@ public class FileModel {
         return fileExtension;
     }
 
-    public void setId(int id) {
-        Id = id;
+    public void setFile(File file) {
+        this.file = file;
     }
 
     public void setFileName(String fileName) {
