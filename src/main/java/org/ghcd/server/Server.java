@@ -1,13 +1,17 @@
 package org.ghcd.server;
 
+import org.ghcd.model.FileModel;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class Server {
 
     private static DataOutputStream dataOutputStream = null;
     private static DataInputStream dataInputStream = null;
+    private ArrayList<FileModel> listOfFiles = new ArrayList<>();
 
     public void openServer() {
         try (ServerSocket serverSocket = new ServerSocket(12345)) {
@@ -19,11 +23,12 @@ public class Server {
             dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
             // Here we call receiveFile define new for that
             // file
-            int fileNameLength = dataInputStream.readInt();
+            /*int fileNameLength = dataInputStream.readInt();
             byte[] fileNameBytes = new byte[fileNameLength];
             dataInputStream.readFully(fileNameBytes, 0, fileNameLength);
             String fileName = new String(fileNameBytes);
-            receiveFile(fileName);
+            receiveFile(fileName);*/
+            getMultipleFiles();
 
             dataInputStream.close();
             dataOutputStream.close();
@@ -49,6 +54,33 @@ public class Server {
         // Here we received file
         System.out.println("File is Received");
         fileOutputStream.close();
+    }
+
+    public void getMultipleFiles() {
+        try {
+            int fileCount = dataInputStream.readInt();
+            System.out.println("amountOfFiles: " + fileCount);
+            for (int i = 0; i <fileCount; i++ ) {
+                int bytes = 0;
+                int fileNameLength = dataInputStream.readInt();
+                byte[] fileNameBytes = new byte[fileNameLength];
+                dataInputStream.readFully(fileNameBytes, 0, fileNameLength);
+                String fileName = new String(fileNameBytes);
+                FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+
+                long size = dataInputStream.readLong(); // read file size
+                byte[] buffer = new byte[4 * 1024];
+                long totalBytesRead = 0;
+                while (totalBytesRead < size && (bytes = dataInputStream.read(buffer, 0, (int) Math.min(buffer.length, size - totalBytesRead))) != -1) {
+                    fileOutputStream.write(buffer, 0, bytes);
+                    totalBytesRead += bytes;
+                }
+                fileOutputStream.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void startServer() throws IOException {

@@ -5,6 +5,7 @@ public class FileModel {
     private int Id;
     private String fileName;
     private byte[] fileData;
+    private Long fileSize;
     private String fileExtension;
 
     public FileModel(int id, String fileName, byte[] fileData, String fileExtension) {
@@ -13,6 +14,9 @@ public class FileModel {
         this.fileData = fileData;
         this.fileExtension = fileExtension;
     }
+
+    public FileModel() {}
+
 
     public int getId() {
         return Id;
@@ -44,5 +48,13 @@ public class FileModel {
 
     public void setFileExtension(String fileExtension) {
         this.fileExtension = fileExtension;
+    }
+
+    public Long getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(Long fileSize) {
+        this.fileSize = fileSize;
     }
 }
