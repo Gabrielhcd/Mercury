@@ -4,20 +4,20 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.DataInputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public class Client {
-    
+    private String[] enableProtocols = {"TLSv1.2", "TLSv1.3", "TLSv1.1", "TLSv1", "SLSv3"};
     private DataOutputStream dataOutputStream = null;
     private DataInputStream dataInputStream = null;
-    private Socket socket;
-    private String mainPCIp = "192.168.0.26";
-    private Integer socketPort = 12345;
+
+    private ClientConfiguration clientConfiguration = new ClientConfiguration();
 
     public void createClientConnection() {
 
-        try (Socket socket = new Socket(mainPCIp, socketPort)) {
-           
+        try {
+            Socket socket = clientConfiguration.createClientConnection();
             dataInputStream = new DataInputStream(socket.getInputStream());
             dataOutputStream = new DataOutputStream(socket.getOutputStream());
             System.out.println("Sending the File to the Server");
@@ -28,6 +28,7 @@ public class Client {
               dataInputStream.close();
           }
           catch (Exception e) {
+            System.out.println("No server found!");
               e.printStackTrace();
           }
     }
