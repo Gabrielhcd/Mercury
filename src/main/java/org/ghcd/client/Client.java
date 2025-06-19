@@ -19,7 +19,7 @@ public class Client {
     private String[] listOfFilesToSend = {"/home/vanhoemhein/Documents/txts/testFile.txt",
                                     "/home/vanhoemhein/Documents/txts/secondFile.txt"};
     private ArrayList<FileModel> files = new ArrayList<>();
-    public void createClientConnection() {
+    public void dataIOConfiguration() {
 
         try {
             Socket socket = clientConfiguration.createClientConnection();
@@ -34,8 +34,8 @@ public class Client {
               dataInputStream.close();
               dataOutputStream.close();
           }
-          catch (Exception e) {
-            System.out.println("No server found!");
+          catch (IOException e) {
+            System.out.println("Data IO error!");
               e.printStackTrace();
           }
     }
