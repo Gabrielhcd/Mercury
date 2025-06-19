@@ -12,9 +12,10 @@ public class Server {
     private static DataOutputStream dataOutputStream = null;
     private static DataInputStream dataInputStream = null;
     private ArrayList<FileModel> listOfFiles = new ArrayList<>();
+    private ServerConfiguration serverConfiguration = new ServerConfiguration();
 
     public void openServer() {
-        try (ServerSocket serverSocket = new ServerSocket(12345)) {
+        /*try (ServerSocket serverSocket = new ServerSocket(12345)) {
             System.out.println("Server is Starting in Port 900");
             // Accept the Client request using accept method
             Socket clientSocket = serverSocket.accept();
@@ -28,6 +29,10 @@ public class Server {
             dataInputStream.readFully(fileNameBytes, 0, fileNameLength);
             String fileName = new String(fileNameBytes);
             receiveFile(fileName);*/
+        try {
+            Socket clientSocket = serverConfiguration.createServerConnection();
+            dataInputStream = new DataInputStream(clientSocket.getInputStream());
+            dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
             getMultipleFiles();
 
             dataInputStream.close();
