@@ -16,6 +16,7 @@ public class Devices {
     FileWriter fileWriter;
     BufferedWriter bufferedWriter;
     BufferedReader bufferedReader;
+    String filePath = "devices.txt";
 
     public void saveNewDevice(String filePath, String deviceName, String deviceIp) {
         try {
@@ -30,6 +31,10 @@ public class Devices {
             bufferedWriter.write(deviceName);
             bufferedWriter.write('-');
             bufferedWriter.write(deviceIp);
+            bufferedWriter.write('-');
+            bufferedWriter.write("8888");
+            bufferedWriter.write('-');
+            bufferedWriter.write("12345");
             bufferedWriter.newLine();
             bufferedWriter.close();
             System.out.println(deviceName + " saved!");
@@ -48,14 +53,14 @@ public class Devices {
         }
 
         if (deviceName == null) {
-            if (getDevice(filePath, deviceIp, deviceName).getDeviceIp().equals(deviceIp)) {
+            if (getDevice(deviceIp, deviceName).getDeviceIp().equals(deviceIp)) {
                 System.out.println("This Ip already exists");
                 return false;
             }
         }
         
         if(deviceIp == null) {
-            if (getDevice(filePath, deviceIp, deviceName).getDeviceName().equals(deviceName)) {
+            if (getDevice(deviceIp, deviceName).getDeviceName().equals(deviceName)) {
                 System.out.println("This deviceName already exists");
                 return false;
             }
@@ -64,9 +69,9 @@ public class Devices {
         return true;
     }
 
-    public DeviceModel getDevice(String filePath, String deviceIp, String deviceName) {
+    public DeviceModel getDevice(String deviceIp, String deviceName) {
         DeviceModel deviceModel = new DeviceModel();
-        String[] deviceParams = new String[1];
+        String[] deviceParams = new String[3];
         String fileLine;
         String searchParam = "";
 
@@ -89,6 +94,8 @@ public class Devices {
             }
             deviceModel.setDeviceName(deviceParams[0]);
             deviceModel.setDeviceIp(deviceParams[1]);
+            deviceModel.setPingPort(Integer.parseInt(deviceParams[2]));
+            deviceModel.setFileTransferPort(Integer.parseInt(deviceParams[3]));
         } catch (Exception e) {
             System.out.println("Error reading IPs file");
         }
