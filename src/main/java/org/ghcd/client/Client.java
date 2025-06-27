@@ -31,8 +31,9 @@ public class Client {
             files = fileSender.addFilesToList(listOfFilesToSend);
             sendMultipleFiles();
   
-              dataInputStream.close();
-              dataOutputStream.close();
+            dataInputStream.close();
+            dataOutputStream.close();
+            socket.close();
           }
           catch (IOException e) {
             System.out.println("Data IO error!");
