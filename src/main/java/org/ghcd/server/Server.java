@@ -1,20 +1,26 @@
 package org.ghcd.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ghcd.model.FileModel;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
 public class Server {
 
-    private static DataOutputStream dataOutputStream = null;
-    private static DataInputStream dataInputStream = null;
     private ArrayList<FileModel> listOfFiles = new ArrayList<>();
     private ServerConfiguration serverConfiguration = new ServerConfiguration();
+    private FileReceiver fileReceiver = new FileReceiver();
+    private Integer socketPort = 12345;
 
-    public void openServer() {
+    public static Logger logger = LogManager.getLogger(Server.class);
+
+    public void openServer() throws IOException {
+        logger.info("Entered openServer...");
         /*try (ServerSocket serverSocket = new ServerSocket(12345)) {
             System.out.println("Server is Starting in Port 900");
             // Accept the Client request using accept method
@@ -29,22 +35,42 @@ public class Server {
             dataInputStream.readFully(fileNameBytes, 0, fileNameLength);
             String fileName = new String(fileNameBytes);
             receiveFile(fileName);*/
-        try {
-            Socket clientSocket = serverConfiguration.createServerConnection();
-            dataInputStream = new DataInputStream(clientSocket.getInputStream());
-            dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
-            getMultipleFiles();
+        ServerSocket serverSocket = new ServerSocket(socketPort);
+        while (true) {
+            logger.info("Server starting in port: {}", serverSocket);
 
-            dataInputStream.close();
-            dataOutputStream.close();
-            clientSocket.close();
+            //clientSocket = serverConfiguration.createServerConnection();
+            try {
+                Socket clientSocket = serverSocket.accept();
+                DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
+                DataOutputStream dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
+                fileReceiver.getMultipleFiles(dataInputStream);
+
+                try {
+                    if (dataInputStream != null) {
+                        dataInputStream.close();
+                        logger.info("DataInputStream closed.");
+                    }
+                    if (dataOutputStream != null) {
+                        dataOutputStream.close();
+                        logger.info("DataOutputStream closed.");
+                    }
+                    logger.info("Ref: {}", System.identityHashCode(clientSocket));
+                    clientSocket.close();
+                    logger.info("clientSocket closed.");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+
+
     }
 
-    private static void receiveFile(String fileName) throws Exception {
+    /*private static void receiveFile(String fileName) throws Exception {
         int bytes = 0;
         FileOutputStream fileOutputStream = new FileOutputStream(fileName);
 
@@ -59,9 +85,9 @@ public class Server {
         // Here we received file
         System.out.println("File is Received");
         fileOutputStream.close();
-    }
+    }*/
 
-    public void getMultipleFiles() {
+    /*public void getMultipleFiles() {
         try {
             int fileCount = dataInputStream.readInt();
             System.out.println("amountOfFiles: " + fileCount);
@@ -81,37 +107,13 @@ public class Server {
                     totalBytesRead += bytes;
                 }
                 fileOutputStream.close();
+
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-    }
+    }*/
 
-    public void startServer() throws IOException {
-        ServerSocket serverSocket = new ServerSocket(12345); // Port number
-        System.out.println("Server started. Waiting for clients...");
 
-        while (true) {
-            Socket clientSocket = serverSocket.accept();
-            System.out.println("Client connected from " + clientSocket.getInetAddress());
-
-            // Handle communication with the client (using threads)
-            new Thread(() -> {
-                try {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                    PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true);
-
-                    String message;
-                    while ((message = reader.readLine()) != null) {
-                        System.out.println("Received: " + message);
-                        writer.println("Server received: " + message);
-                    }
-                    clientSocket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        }
-    }
 }
